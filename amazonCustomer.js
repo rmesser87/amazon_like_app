@@ -18,13 +18,15 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     readProducts();
+    setTimeout(function () {
+        initialAction()
+    }, 2000);
 });
 
 function readProducts() {
     connection.query("select * from products", function (err, res) {
         if (err) throw err;
         console.log(Table.print(res));
-        initialAction();
         //   connection.end();
     });
 };
@@ -34,32 +36,57 @@ function initialAction() {
         name: "chooseProduct",
         type: "input",
         message: "What is the ID (user_id) of the product you would like to buy?",
-        validate: function(value) {
+        validate: function (value) {
             if (isNaN(value) === false && value % 1 == 0) {
-              return true;
+                return true;
             }
             return false;
-            console.log("Please enter a valid ID and quantity")
             throw err;
-            
-          }
+
+        }
     }, {
-        name: "quanity",
+        name: "quantity",
         type: "input",
         message: "How many units would you like to buy?",
-        validate: function(value) {
+        validate: function (value) {
             if (isNaN(value) === false && value % 1 == 0) {
-              return true;
+                return true;
             }
             return false;
-            console.log("Please enter a valid ID and quantity")
+
             throw err;
-          }
+        }
     }];
     inquirer
         .prompt(questions)
         .then(function (answer) {
-            // (Number.isInteger(answer.chooseProduct.value)
+            var cart = parseInt(answer.chooseProduct);
+            var quant = parseInt(answer.quantity);
+            purchase(cart, quant);
             console.log("------Searching Inventory------");
         });
+}
+
+function purchase(purchaseItem, purchaseQuantity) {
+    connection.query(`select * from products where item_id = ${purchaseItem}`, function (err, res) {
+        if (err) throw err;
+        var inventory = res[0].stock_quantity
+        // console.log(res)
+        checkQuantity(inventory, purchaseQuantity);
+        //   connection.end();
+    });
+};
+
+function checkQuantity(nstock, pQuantity) {
+    if (nstock >= pQuantity) {
+        console.log("Purchase succussful!")
+    } else {
+        console.log("That quantity is not in stock, please try again")
+    }
+}
+
+function updateInventory() {
+    connection.query(`select * from products where item_id = ${purchaseItem}`, function (err, res) {
+        
+    });
 }
