@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
     user: "root",
 
     // Your password
-    password: "",
+    password: "!Ney87chu19",
     database: "bamazon_db"
 });
 
@@ -70,23 +70,39 @@ function initialAction() {
 function purchase(purchaseItem, purchaseQuantity) {
     connection.query(`select * from products where item_id = ${purchaseItem}`, function (err, res) {
         if (err) throw err;
-        var inventory = res[0].stock_quantity
+        var inventory = parseInt(res[0].stock_quantity);
+        // var total = parseInt(res[0].price * purchaseQuantity);
+        var newQuantity = parseInt(inventory - purchaseQuantity);
         // console.log(res)
         checkQuantity(inventory, purchaseQuantity);
+        updateInventory(purchaseItem, newQuantity);
         //   connection.end();
     });
+    // console.log(`Your total is $ ${total}.`);
 };
 
 function checkQuantity(nstock, pQuantity) {
     if (nstock >= pQuantity) {
         console.log("Purchase succussful!")
+        // updateInventory(purchaseitem, newQuantity)
     } else {
-        console.log("That quantity is not in stock, please try again")
+        console.log("That quantity is not in stock, please try again");
+        initialAction();
     }
 }
 
-function updateInventory() {
-    connection.query(`select * from products where item_id = ${purchaseItem}`, function (err, res) {
-        
-    });
-}
+function updateInventory(purchaseItem, nq) {
+    connection.query(
+        "UPDATE products SET ? WHERE ?", [{
+                stock_quantity: nq
+            },
+            {
+                item_id: purchaseItem
+            }
+        ],
+        function (err, res) {
+            if (error) throw err;
+        }
+
+    );
+};
